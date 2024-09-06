@@ -1,99 +1,117 @@
-import { useReducer } from 'react';
+import React, { useState } from 'react'; 
 import './App.css';
 
-const ACTIONS = {
-  ADD_DIGIT: 'add-digit',
-  CHOOSE_OPERATION: 'choose-operation',
-  CLEAR: 'clear',
-  DELETE_DIGIT: 'delete-digit',
-  EVALUATE: 'evaluate',
+function App() {
+  const [display, setDisplay] = useState('0');
+  const [firstOperand, setFirstOperand] = useState(null); 
+  const [operator, setOperator] = useState(null); 
+  const [waitingForSecondOperand, setWaitingForSecondOperand] = useState(false); 
+
+  const inputDigit = (digit) => {
+    if (waitingForSecondOperand) {
+      setDisplay(String(digit));
+      setWaitingForSecondOperand(false);
+    } else {
+      setDisplay(display === '0' ? String(digit) : display + digit);
+    }
+  };
+
+  const inputDecimal = () => {
+    if (waitingForSecondOperand) {
+      setDisplay('0.');
+      setWaitingForSecondOperand(false);
+    } else if (!display.includes('.')) {
+      setDisplay(display + '.');
+    }
+  };
+
+  const clearDisplay = () => { 
+    setDisplay('0'); 
+    setFirstOperand(null);
+    setOperator(null);
+    setWaitingForSecondOperand(false); 
+  };
+const backspace = () => {
+  if (display.length === 1) {
+    setDisplay('0'); 
+  } else {
+    setDisplay(display.slice(0, -1));
+  }
+};
+const inputPercent = () => {
+  const currentValue = parseFloat(display); 
+  if (isNaN(currentValue)) return; 
+  setDisplay(String(currentValue / 100)); 
 };
 
-function reducer(state, { type, payload }) {
-  switch (type) {
-    case ACTIONS.ADD_DIGIT:
-      return {
-        ...state,
-        currentOperand: state.currentOperand.length < 10 ? state.currentOperand + payload.digit : state.currentOperand,
-      };
-    case ACTIONS.CHOOSE_OPERATION:
-      if (state.currentOperand === '') return state;
-      if (state.previousOperand !== '') {
-        return {
-          ...state,
-          previousOperand: eval(`${state.previousOperand}${state.operation}${state.currentOperand}`),
-          currentOperand: '',
-          operation: payload.operation,
-        };
-      }
-      return {
-        ...state,
-        previousOperand: state.currentOperand,
-        currentOperand: '',
-        operation: payload.operation,
-      };
-    case ACTIONS.CLEAR:
-      return {
-        previousOperand: '',
-        currentOperand: '',
-        operation: '',
-      };
-    case ACTIONS.DELETE_DIGIT:
-      return {
-        ...state,
-        currentOperand: state.currentOperand.slice(0, -1),
-      };
-    case ACTIONS.EVALUATE:
-      if (state.operation === '' || state.currentOperand === '' || state.previousOperand === '') return state;
-      return {
-        ...state,
-        previousOperand: '',
-        currentOperand: eval(`${state.previousOperand}${state.operation}${state.currentOperand}`).toString(),
-        operation: '',
-      };
-    default:
-      return state;
-  }
+  const performOperation = (nextOperator) => {
+    const inputValue = parseFloat(display);
+  
+    if (firstOperand === null) {
+      setFirstOperand(inputValue);
+    } else if (operator) {
+      const result = calculate(firstOperand, inputValue, operator);
+      setDisplay(String(result));
+      setFirstOperand(result);
+    }
+  
+    setWaitingForSecondOperand(true);
+    setOperator(nextOperator);
+  };
+
+
+  const calculate = (firstOperand, secondOperand, operator) => {
+    switch (operator) {
+      case '+':
+        return firstOperand + secondOperand;
+      case '-':
+        return firstOperand - secondOperand;
+      case '*':
+        return firstOperand * secondOperand;
+      case '/':
+        return firstOperand / secondOperand;
+      default:
+        return secondOperand;
+    }
+  };
+  const finalizeOperator = ()=>{
+if (operator && firstOperand !==null &&! waitingForSecondOperand) {
+  const inputValue = parseFloat(display);
+  const result = calculate(firstOperand, inputValue, operator);
+  setDisplay(String(result));
+  setFirstOperand(null);
+  setOperator(null);
+  setWaitingForSecondOperand(true);
 }
-
-function App() {
-  const [{ currentOperand, previousOperand, operation }, dispatch] = useReducer(reducer, {
-    currentOperand: '',
-    previousOperand: '',
-    operation: '',
-  });
-
-  const handleDigit = (digit) => dispatch({ type: ACTIONS.ADD_DIGIT, payload: { digit } });
-  const handleOperation = (operation) => dispatch({ type: ACTIONS.CHOOSE_OPERATION, payload: { operation } });
-  const handleClear = () => dispatch({ type: ACTIONS.CLEAR });
-  const handleDeleteDigit = () => dispatch({ type: ACTIONS.DELETE_DIGIT });
-  const handleEvaluate = () => dispatch({ type: ACTIONS.EVALUATE });
+  }
 
   return (
-    <div className='calculator-grid'>
-      <div className='output'>
-        <div className='previous-operand'>{previousOperand} {operation}</div>
-        <div className='current-operand'>{currentOperand}</div>
-      </div>
-      <button onClick={handleClear} className='span-two'>AC</button>
-      <button onClick={handleDeleteDigit}>DEL</button>
-      <button onClick={() => handleOperation('/')}>/</button>
-      <button onClick={() => handleDigit('7')}>7</button>
-      <button onClick={() => handleDigit('8')}>8</button>
-      <button onClick={() => handleDigit('9')}>9</button>
-      <button onClick={() => handleOperation('*')}>*</button>
-      <button onClick={() => handleDigit('4')}>4</button>
-      <button onClick={() => handleDigit('5')}>5</button>
-      <button onClick={() => handleDigit('6')}>6</button>
-      <button onClick={() => handleOperation('-')}>-</button>
-      <button onClick={() => handleDigit('1')}>1</button>
-      <button onClick={() => handleDigit('2')}>2</button>
-      <button onClick={() => handleDigit('3')}>3</button>
-      <button onClick={() => handleOperation('+')}>+</button>
-      <button onClick={() => handleDigit('0')}>0</button>
-      <button onClick={() => handleDigit('.')}>.</button>
-      <button onClick={handleEvaluate} className='span-two'>=</button>
+    <div className="calculator">
+    <div className="display">{display}</div>
+    <div className="keypad">
+    <button onClick={clearDisplay}>C</button>
+    <button onClick={backspace}>x</button>
+    <button onClick={inputPercent}>%</button>
+    <button onClick={() => performOperation('/')}>/</button>
+      <button onClick={() => inputDigit(7)}>7</button>
+      <button onClick={() => inputDigit(8)}>8</button>
+      <button onClick={() => inputDigit(9)}>9</button>
+      <button onClick={() => performOperation('+')}>+</button>
+      <button onClick={() => inputDigit(4)}>4</button>
+      <button onClick={() => inputDigit(5)}>5</button>
+      <button onClick={() => inputDigit(6)}>6</button>
+      <button onClick={() => performOperation('-')}>-</button>
+      <button onClick={() => inputDigit(1)}>1</button>
+      <button onClick={() => inputDigit(2)}>2</button>
+      <button onClick={() => inputDigit(3)}>3</button>
+      <button onClick={() => performOperation('*')}>*</button>
+      <button onClick={() => inputDigit(0)}>0</button>
+      <button onClick={inputDecimal}>.</button>
+      <button onClick={finalizeOperator}>=</button>
+  
+    
     </div>
+  </div>
   );
 }
 

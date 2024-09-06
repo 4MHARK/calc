@@ -1,51 +1,65 @@
-*, *::before, *::after  {
-  box-sizing: border-box;
+.calculator {
+  width: 100%;
+  max-width: 360px;
+  margin: 30px auto;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  background-color: #f8f8f8;
 }
-body{
-  margin: 0;
-  background: linear-gradient(to right,#00aaff,#00ff6c);
-}
-.calculator-grid{
-  display: grid;
-  margin-top: 2rem;
-   grid-template-columns: repeat(4, 6fr);
-   grid-template-rows: minmax(7rem, auto) repeat(5, 6rem);
-  /*grid-gap: 10px;
-  padding: 20px;
-  justify-items: center; */
-}
-.calculator-grid > button{
-  cursor: pointer;
-  justify-content: center;
+
+/* Display screen of calculator */
+.display {
+  background-color: #222;
+  color: #fff;
   font-size: 2rem;
-  border: 1px solid white;
-  outline: none;
-  background-color: rgb(255, 255, 255, .75);
+  padding: 20px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
-.calculator-grid > button:hover,
-.calculator-grid > button:focus
-{
-  background-color: rgb(255, 255, 255, .9);
+
+/* Keypad container */
+.keypad {
+  padding: 15px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
 }
-.span-two{
-  grid-column: span 2;
-}
-.output{
-grid-column: 1 / -1;
-background-color: rgba(0, 0, 0, .75);
-display: flex;
-flex-direction: column;
-align-items: flex-end;
-justify-content: space-around ;
-padding: .75rem;
-word-wrap: break-word;
-word-break: break-all;
-}
-.output .previous-operand{
-  color: rgb(255, 255, 255, .75);
+
+/* Styling the buttons */
+.button,
+button {
+  background-color: #eee;
+  border: none;
+  padding: 15px 0;
+  border-radius: 8px;
   font-size: 1.5rem;
+  color: #333;
+  box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+  transition: background-color 0.3s, transform 0.2s;
 }
-.output .current-operand{
-  color: white;
-  font-size: 2.5rem;
+
+button:hover,
+button:focus {
+  background-color: #d4d4d8;
+  transform: translateY(-1px);
+}
+
+button:active {
+  background-color: #bcbcbc;
+  transform: translateY(1px);
+}
+
+/* Special button for operation */
+.button.operation {
+  color: #fff;
+  background-color: #fa8231;
+}
+
+.button.operation:hover,
+.button.operation:focus {
+  background-color: #fb9637;
 }
